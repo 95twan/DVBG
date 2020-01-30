@@ -4,7 +4,7 @@ from user.models import User
 
 class Blog(models.Model):
     id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(User, models.CASCADE)
+    user = models.ForeignKey(User, models.CASCADE)
     name = models.CharField(max_length=45)
 
     class Meta:
@@ -14,7 +14,7 @@ class Blog(models.Model):
 
 class Board(models.Model):
     id = models.AutoField(primary_key=True)
-    blog_id = models.ForeignKey(Blog, models.CASCADE)
+    # blog = models.ForeignKey(Blog, models.CASCADE)
     name = models.CharField(max_length=45)
     is_hidden = models.BooleanField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -27,11 +27,11 @@ class Board(models.Model):
 
 class Post(models.Model):
     id = models.AutoField(primary_key=True)
-    board_id = models.ForeignKey(Board, models.SET_NULL, blank=True, null=True)
+    board = models.ForeignKey(Board, models.SET_NULL, blank=True, null=True)
     title = models.CharField(max_length=45)
     content = models.TextField()
     tag = models.CharField(max_length=45, blank=True, null=True)
-    author_id = models.ForeignKey(User, models.SET_NULL, blank=True, null=True)
+    # author = models.ForeignKey(User, models.SET_NULL, blank=True, null=True)
     is_hidden = models.BooleanField()
     published_at = models.DateTimeField(auto_now_add=True)
 
@@ -42,8 +42,8 @@ class Post(models.Model):
 
 class Comment(models.Model):
     id = models.AutoField(primary_key=True)
-    post_id = models.ForeignKey(Post, models.CASCADE)
-    user_id = models.ForeignKey(User, models.SET_NULL, blank=True, null=True)
+    post = models.ForeignKey(Post, models.CASCADE)
+    user = models.ForeignKey(User, models.SET_NULL, blank=True, null=True)
     comment = models.CharField(max_length=45)
     is_private = models.BooleanField()
     registered_at = models.DateTimeField(auto_now_add=True)

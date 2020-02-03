@@ -5,6 +5,7 @@ from django.http import JsonResponse
 
 # post 할 때 check valid
 
+
 class BoardList(View):
     def serialize_data(self):
         values = Board.objects.values()

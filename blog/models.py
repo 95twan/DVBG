@@ -8,7 +8,6 @@ class Blog(models.Model):
     name = models.CharField(max_length=45)
 
     class Meta:
-        managed = False
         db_table = 'blog'
 
 
@@ -21,7 +20,6 @@ class Board(models.Model):
     deleted_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'board'
 
 
@@ -36,7 +34,6 @@ class Post(models.Model):
     published_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        managed = False
         db_table = 'post'
 
 
@@ -49,5 +46,4 @@ class Comment(models.Model):
     registered_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        managed = False
         db_table = 'comment'

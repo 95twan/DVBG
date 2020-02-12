@@ -1,7 +1,9 @@
 import json
 from django.views.generic import View
-from blog.models import Post, Board
 from django.http import JsonResponse
+
+from blog.models import Post, Board
+from user.JWTauth import login_required
 
 # post 할 때 check valid
 
@@ -17,6 +19,7 @@ class BoardList(View):
     def get(self, request):
         return JsonResponse(self.serialize_data(), safe=False)
 
+    @login_required
     def post(self, request):
         json_data = json.loads(request.body)
 

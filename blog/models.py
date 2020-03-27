@@ -40,7 +40,8 @@ class Post(models.Model):
 class Comment(models.Model):
     id = models.AutoField(primary_key=True)
     post = models.ForeignKey(Post, models.CASCADE)
-    user = models.ForeignKey(User, models.SET_NULL, blank=True, null=True)
+    user = models.ForeignKey(User, models.DO_NOTHING)
+    reply = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
     comment = models.CharField(max_length=45)
     is_private = models.BooleanField()
     registered_at = models.DateTimeField(auto_now_add=True)

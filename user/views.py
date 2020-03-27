@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password, check_password
 
 from user.models import User, LoginProvider
-from user.JWTauth import make_token
+from user.jwt_auth import make_token
 import user.validation as valid
 
 

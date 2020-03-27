@@ -42,7 +42,7 @@ class Comment(models.Model):
     post = models.ForeignKey(Post, models.CASCADE)
     user = models.ForeignKey(User, models.DO_NOTHING)
     reply = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
-    comment = models.CharField(max_length=45)
+    content = models.CharField(max_length=45)
     is_private = models.BooleanField()
     registered_at = models.DateTimeField(auto_now_add=True)
 

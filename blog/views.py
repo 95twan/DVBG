@@ -3,6 +3,8 @@ from django.views.generic import View
 from django.http import JsonResponse
 
 from blog.models import Post, Board, Comment
+from blog.tasks import test
+
 from user.jwt_auth import login_required
 
 
@@ -83,6 +85,8 @@ class PostList(View):
             is_hidden=json_data['is_hidden']
         )
 
+        test.delay('post create')
+
         return JsonResponse(json_data, status=201)
 
 
@@ -110,6 +114,8 @@ class PostDetail(View):
             # author_id=json_data['author_id'],
             is_hidden=json_data['is_hidden']
         )
+
+        test.apply_async('post update')
 
         return JsonResponse(json_data)
 

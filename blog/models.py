@@ -13,7 +13,7 @@ class Blog(models.Model):
 
 class Board(models.Model):
     id = models.AutoField(primary_key=True)
-    # blog = models.ForeignKey(Blog, models.CASCADE)
+    blog = models.ForeignKey(Blog, models.CASCADE)
     name = models.CharField(max_length=45)
     is_hidden = models.BooleanField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -29,7 +29,7 @@ class Post(models.Model):
     title = models.CharField(max_length=45)
     content = models.TextField()
     tag = models.CharField(max_length=45, blank=True, null=True)
-    # author = models.ForeignKey(User, models.SET_NULL, blank=True, null=True)
+    author = models.ForeignKey(User, models.SET_NULL, blank=True, null=True)
     is_hidden = models.BooleanField()
     published_at = models.DateTimeField(auto_now_add=True)
 

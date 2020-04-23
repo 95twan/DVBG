@@ -9,4 +9,3 @@ COPY . /DVBGServer
 
 EXPOSE 8000
 
-CMD ["uwsgi", "--http", "0.0.0.0:8000", "--module", "DVBG.wsgi"]

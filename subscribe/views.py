@@ -12,17 +12,16 @@ from subscribe.models import Subscribe
 class SubscribeAuthor(View):
     @login_required
     def post(self, request):
+        # 이미 구독 한 유저랑 나 자신은 구독 안되게 해야됨
         json_data = json.loads(request.body)
 
         user_id = json_data['user_id']
         author_id = json_data['author_id']
 
         user = User.objects.get(pk=user_id)
-        author = User.objects.get(pk=author_id)
+        blogs = Blog.objects.select_related('user').filter(user_id=author_id)
 
-        Subscribe.objects.create(user=user, author=author)
-
-        blogs = author.blog_set.all()
+        Subscribe.objects.create(user=user, author_id=author_id)
 
         for blog in blogs:
             Subscribe.objects.create(user=user, blog=blog)

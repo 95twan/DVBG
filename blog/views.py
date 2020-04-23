@@ -3,7 +3,7 @@ from django.views.generic import View
 from django.http import JsonResponse
 
 from blog.models import Post, Board, Comment
-from blog.tasks import test
+from blog.tasks import feed_task
 
 from user.jwt_auth import login_required
 
@@ -76,16 +76,22 @@ class PostList(View):
         board_id = json_data['board_id']
         board = Board.objects.get(pk=board_id)
 
-        Post.objects.create(
+        post = Post.objects.create(
             board=board,
             title=json_data['title'],
             content=json_data['content'],
             tag=json_data['tag'],
-            # author_id=json_data['author_id'],
+            author_id=json_data['author_id'],
             is_hidden=json_data['is_hidden']
         )
 
-        test.delay('post create')
+        task_data = {
+            "author_id": post.author_id,
+            "post_id": post.id,
+            "post_published_at": post.published_at
+        }
+
+        feed_task.apply_async(kwargs=task_data)
 
         return JsonResponse(json_data, status=201)
 
@@ -111,11 +117,11 @@ class PostDetail(View):
             title=json_data['title'],
             content=json_data['content'],
             tag=json_data['tag'],
-            # author_id=json_data['author_id'],
+            author_id=json_data['author_id'],
             is_hidden=json_data['is_hidden']
         )
 
-        test.apply_async('post update')
+        # feed_task.apply_async()
 
         return JsonResponse(json_data)
 

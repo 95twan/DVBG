@@ -4,6 +4,7 @@
 .DS_Store
 test.sh
 test2.sh
+query_test.py
 ### Django ###
 *.log
 *.pot

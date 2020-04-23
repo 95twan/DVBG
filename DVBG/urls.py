@@ -14,12 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
-from DVBG.query_test import QueryTestView
+# from DVBG.query_test import QueryTestView
 
 urlpatterns = [
     path('api/users/', include('user.urls')),
     path('api/subscribe/', include('subscribe.urls')),
     path('api/feed/', include('feed.urls')),
     path('api/', include('blog.urls')),
-    path('query_test/', QueryTestView.as_view())
+    # path('query_test/', QueryTestView.as_view())
 ]

@@ -94,6 +94,10 @@ DATABASES = {
     'mongodb': {
         'ENGINE': 'djongo',
         'NAME': 'dvbg',
+        'CLIENT': {
+                'host': '127.0.0.1',
+                'port': 27017,
+        }
     }
 }
 
@@ -147,3 +151,7 @@ CELERY_BROKER_TRANSPORT_OPTIONS = {
     'region': AWS_REGION_NAME,
     'polling_interval': 5,
 }
+
+# CORS Setting
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True

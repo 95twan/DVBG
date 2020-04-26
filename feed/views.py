@@ -7,7 +7,14 @@ from feed.models import Feed
 
 class FeedView(View):
     def serialize_data(self):
-        values = Feed.objects.values()
+        values = Feed.objects.values(
+            'article_type',
+            'author_id',
+            'user_id',
+            'post_id',
+            'post_thumbnail_url',
+            'post_published_at'
+        )
 
         serialized_data = list(values)
 

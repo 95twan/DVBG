@@ -2,10 +2,19 @@ import json
 from django.views.generic import View
 from django.http import JsonResponse
 
-from blog.models import Post, Board, Comment
+from blog.models import Post, Board, Comment, Blog
 from blog.tasks import feed_task
 
 from user.jwt_auth import login_required
+
+
+class BlogDetail(View):
+    def serialize_data(self, pk):
+        board = Blog.objects.filter(id=pk).values()[0]
+        return board
+
+    def get(self, request, pk):
+        return JsonResponse(self.serialize_data(pk=pk))
 
 
 class BoardList(View):
@@ -184,3 +193,15 @@ class CommentDetail(View):
         }
 
         return JsonResponse(response_data)
+
+
+class UserBlog(View):
+    def serialize_data(self, user_id):
+        blogs = Blog.objects.filter(user_id=user_id).values()
+
+        serialized_data = list(blogs)
+
+        return serialized_data
+
+    def get(self, request, user_id):
+        return JsonResponse(self.serialize_data(user_id=user_id), safe=False)

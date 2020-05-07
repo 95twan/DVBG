@@ -3,7 +3,7 @@ from django.views.generic import View
 from django.http import JsonResponse
 
 from blog.models import Post, Board, Comment, Blog
-from blog.tasks import feed_task
+from blog.tasks import add_new_post_feed_task
 
 from user.jwt_auth import login_required
 
@@ -85,10 +85,13 @@ class PostList(View):
         board_id = json_data['board_id']
         board = Board.objects.get(pk=board_id)
 
+        images_str_data = json.dumps(json_data['images'])
+
         post = Post.objects.create(
             board=board,
             title=json_data['title'],
             content=json_data['content'],
+            images=images_str_data,
             tag=json_data['tag'],
             author_id=json_data['author_id'],
             is_hidden=json_data['is_hidden']
@@ -100,7 +103,7 @@ class PostList(View):
             "post_published_at": post.published_at
         }
 
-        feed_task.apply_async(kwargs=task_data)
+        add_new_post_feed_task.apply_async(kwargs=task_data)
 
         return JsonResponse(json_data, status=201)
 
@@ -120,17 +123,20 @@ class PostDetail(View):
         board_id = json_data['board_id']
         board = Board.objects.get(pk=board_id)
 
+        images_str_data = json.dumps(json_data['images'])
+
         post = Post.objects.filter(id=pk)
         post.update(
             board=board,
             title=json_data['title'],
             content=json_data['content'],
+            images=images_str_data,
             tag=json_data['tag'],
             author_id=json_data['author_id'],
             is_hidden=json_data['is_hidden']
         )
 
-        # feed_task.apply_async()
+        # add_new_post_feed_task.apply_async()
 
         return JsonResponse(json_data)
 

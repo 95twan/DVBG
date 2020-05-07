@@ -28,6 +28,7 @@ class Post(models.Model):
     board = models.ForeignKey(Board, models.SET_NULL, blank=True, null=True)
     title = models.CharField(max_length=45)
     content = models.TextField()
+    images = models.TextField(blank=True, null=True)
     tag = models.CharField(max_length=45, blank=True, null=True)
     author = models.ForeignKey(User, models.SET_NULL, blank=True, null=True)
     is_hidden = models.BooleanField()

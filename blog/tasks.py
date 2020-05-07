@@ -7,7 +7,7 @@ from feed.models import Feed
 
 
 @shared_task
-def feed_task(author_id, post_id, post_published_at):
+def add_new_post_feed_task(author_id, post_id, post_published_at):
 
     # post_id로 블로그 찾고 해당 블로그를 구독 하는 유저 찾기
     value = Post.objects.filter(pk=1).select_related('board').values('board__blog_id')[0]

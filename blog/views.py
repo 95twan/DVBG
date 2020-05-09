@@ -3,7 +3,7 @@ from django.views.generic import View
 from django.http import JsonResponse
 
 from blog.models import Post, Board, Comment, Blog
-from blog.tasks import add_new_post_feed_task
+from blog.tasks import add_new_post_feed_task, removed_post_delete_feed_task
 
 from user.jwt_auth import login_required
 
@@ -73,6 +73,9 @@ class PostList(View):
 
         serialized_data = list(values)
 
+        for data in serialized_data:
+            data["images"] = json.loads(data["images"])
+
         return serialized_data
 
     def get(self, request):
@@ -85,7 +88,9 @@ class PostList(View):
         board_id = json_data['board_id']
         board = Board.objects.get(pk=board_id)
 
-        images_str_data = json.dumps(json_data['images'])
+        images_str_data = json.dumps(json_data.get('images'))
+        if images_str_data == "null":
+            images_str_data = "[]"
 
         post = Post.objects.create(
             board=board,
@@ -111,6 +116,9 @@ class PostList(View):
 class PostDetail(View):
     def serialize_data(self, pk):
         post = Post.objects.filter(id=pk).values()[0]
+
+        post["images"] = json.loads(post["images"])
+
         return post
 
     def get(self, request, pk):
@@ -123,7 +131,9 @@ class PostDetail(View):
         board_id = json_data['board_id']
         board = Board.objects.get(pk=board_id)
 
-        images_str_data = json.dumps(json_data['images'])
+        images_str_data = json.dumps(json_data.get('images'))
+        if images_str_data == 'null':
+            images_str_data = '[]'
 
         post = Post.objects.filter(id=pk)
         post.update(
@@ -144,6 +154,8 @@ class PostDetail(View):
     def delete(self, request, pk):
         post = Post.objects.filter(id=pk)
         post.delete()
+
+        removed_post_delete_feed_task.apply_async((pk, ))
 
         response_data = {
             "success": True

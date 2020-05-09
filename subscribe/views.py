@@ -7,6 +7,7 @@ from user.models import User
 from user.jwt_auth import login_required
 from blog.models import Blog
 from subscribe.models import Subscribe
+from subscribe.tasks import subscribe_author_add_feed_task
 
 
 class SubscribeAuthor(View):
@@ -25,6 +26,8 @@ class SubscribeAuthor(View):
 
         for blog in blogs:
             Subscribe.objects.create(user=user, blog=blog)
+
+        subscribe_author_add_feed_task.apply_async((user_id, author_id))
 
         return JsonResponse({"success": True})
 

@@ -19,7 +19,7 @@ from django.urls import path, include
 urlpatterns = [
     path('api/users/', include('user.urls')),
     path('api/subscribes/', include('subscribe.urls')),
-    path('api/feeds/', include('feed.urls')),
+    path('api/', include('feed.urls')),
     path('api/', include('blog.urls')),
     # path('query_test/', QueryTestView.as_view())
 ]

@@ -1,3 +1,5 @@
+import json
+
 from django.db import models
 from user.models import User
 
@@ -11,6 +13,7 @@ class Blog(models.Model):
         db_table = 'blog'
 
     def json_serializer(self):
+        # allow Null인거는 체크햐야 함
         return {
             "id": self.id,
             "user_id": self.user.id,
@@ -30,6 +33,7 @@ class Board(models.Model):
         db_table = 'board'
 
     def json_serializer(self):
+        # allow Null인거는 체크햐야 함
         return {
             "id": self.id,
             "blog_id": self.blog.id,
@@ -54,6 +58,23 @@ class Post(models.Model):
     class Meta:
         db_table = 'post'
 
+    def json_serializer(self):
+
+        image_data = json.loads(self.images)
+
+        # allow Null인거는 체크햐야 함
+        return {
+            "id": self.id,
+            "board_id": self.board.id,
+            "title": self.title,
+            "content": self.content,
+            "images": image_data,
+            "tag": self.tag,
+            "author_id": self.author.id,
+            "is_hidden": self.is_hidden,
+            "published_at": self.published_at
+        }
+
 
 class Comment(models.Model):
     id = models.AutoField(primary_key=True)
@@ -66,3 +87,16 @@ class Comment(models.Model):
 
     class Meta:
         db_table = 'comment'
+
+    def json_serializer(self):
+
+        # allow Null인거는 체크햐야 함
+        return {
+            "id": self.id,
+            "post_id": self.post.id,
+            "user_id": self.user.id,
+            "reply_id": self.reply.id,
+            "content": self.content,
+            "is_private": self.is_private,
+            "registered_at": self.registered_at
+        }

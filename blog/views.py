@@ -33,7 +33,7 @@ class BoardList(View):
     def post(self, request):
         json_data = json.loads(request.body)
 
-        Board.objects.create(name=json_data['name'], is_hidden=json_data['is_hidden'])
+        Board.objects.create(**json_data)
 
         return JsonResponse(json_data, status=201)
 
@@ -75,39 +75,22 @@ class BoardDetail(View):
 
 
 class PostList(View):
-    def serialize_data(self):
-        values = Post.objects.values()
-
-        serialized_data = list(values)
-
-        for data in serialized_data:
-            data["images"] = json.loads(data["images"])
-
-        return serialized_data
-
     def get(self, request):
-        return JsonResponse(self.serialize_data(), safe=False)
+        posts = Post.objects.all()
+        post_json_list = [post.json_serializer() for post in posts]
+        return JsonResponse(post_json_list, safe=False)
 
     @login_required
     def post(self, request):
         json_data = json.loads(request.body)
 
-        board_id = json_data['board_id']
-        board = Board.objects.get(pk=board_id)
-
         images_str_data = json.dumps(json_data.get('images'))
         if images_str_data == "null":
             images_str_data = "[]"
 
-        post = Post.objects.create(
-            board=board,
-            title=json_data['title'],
-            content=json_data['content'],
-            images=images_str_data,
-            tag=json_data['tag'],
-            author_id=json_data['author_id'],
-            is_hidden=json_data['is_hidden']
-        )
+        json_data['images'] = images_str_data
+
+        post = Post.objects.create(**json_data)
 
         task_data = {
             "author_id": post.author_id,
@@ -121,15 +104,19 @@ class PostList(View):
 
 
 class PostDetail(View):
-    def serialize_data(self, pk):
-        post = Post.objects.filter(id=pk).values()[0]
-
-        post["images"] = json.loads(post["images"])
-
-        return post
-
     def get(self, request, pk):
-        return JsonResponse(self.serialize_data(pk=pk))
+        try:
+            post = Post.objects.get(id=pk)
+        except Post.DoesNotExist:
+            error_data = {
+                "status": 404,
+                "err_msg": "해당하는 아이디의 포스트가 없습니다."
+            }
+            return JsonResponse(error_data, status=404)
+
+        post_json = post.json_serializer()
+
+        return JsonResponse(post_json)
 
     @login_required
     def put(self, request, pk):
@@ -172,15 +159,10 @@ class PostDetail(View):
 
 
 class CommentList(View):
-    def serialize_data(self):
-        comments = Comment.objects.values()
-
-        serialized_data = list(comments)
-
-        return serialized_data
-
     def get(self, request):
-        return JsonResponse(self.serialize_data(), status=200, safe=False)
+        comments = Comment.objects.all()
+        comment_json_list = [comment.json_serializer() for comment in comments]
+        return JsonResponse(comment_json_list, safe=False)
 
     @login_required
     def post(self, request):
@@ -192,12 +174,19 @@ class CommentList(View):
 
 
 class CommentDetail(View):
-    def serialize_data(self, pk):
-        comment = Comment.objects.filter(id=pk).values()[0]
-        return comment
-
     def get(self, request, pk):
-        return JsonResponse(self.serialize_data(pk=pk))
+        try:
+            comment = Comment.objects.get(id=pk)
+        except Comment.DoesNotExist:
+            error_data = {
+                "status": 404,
+                "err_msg": "해당하는 아이디의 코멘트가 없습니다."
+            }
+            return JsonResponse(error_data, status=404)
+
+        comment_json = comment.json_serializer()
+
+        return JsonResponse(comment_json)
 
     @login_required
     def put(self, request, pk):
@@ -221,12 +210,7 @@ class CommentDetail(View):
 
 
 class UserBlog(View):
-    def serialize_data(self, user_id):
-        blogs = Blog.objects.filter(user_id=user_id).values()
-
-        serialized_data = list(blogs)
-
-        return serialized_data
-
     def get(self, request, user_id):
-        return JsonResponse(self.serialize_data(user_id=user_id), safe=False)
+        blogs = Blog.objects.filter(user_id=user_id)
+        blog_json_list = [blog.json_serializer() for blog in blogs]
+        return JsonResponse(blog_json_list, safe=False)

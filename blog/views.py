@@ -10,7 +10,15 @@ from user.jwt_auth import login_required
 
 class BlogDetail(View):
     def get(self, request, pk):
-        blog = Blog.objects.get(id=pk)
+        try:
+            blog = Blog.objects.get(id=pk)
+        except Blog.DoesNotExist:
+            error_data = {
+                "status": 404,
+                "err_msg": "해당하는 아이디의 블로그가 없습니다."
+            }
+            return JsonResponse(error_data, status=404)
+
         blog_json = blog.json_serializer()
         return JsonResponse(blog_json)
 
@@ -31,12 +39,18 @@ class BoardList(View):
 
 
 class BoardDetail(View):
-    def serialize_data(self, pk):
-        board = Board.objects.filter(id=pk).values()[0]
-        return board
-
     def get(self, request, pk):
-        return JsonResponse(self.serialize_data(pk=pk))
+        try:
+            board = Board.objects.get(id=pk)
+        except Board.DoesNotExist:
+            error_data = {
+                "status": 404,
+                "err_msg": "해당하는 아이디의 보드가 없습니다."
+            }
+            return JsonResponse(error_data, status=404)
+
+        board_json = board.json_serializer()
+        return JsonResponse(board_json)
 
     @login_required
     def put(self, request, pk):

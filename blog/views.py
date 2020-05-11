@@ -9,24 +9,17 @@ from user.jwt_auth import login_required
 
 
 class BlogDetail(View):
-    def serialize_data(self, pk):
-        board = Blog.objects.filter(id=pk).values()[0]
-        return board
-
     def get(self, request, pk):
-        return JsonResponse(self.serialize_data(pk=pk))
+        blog = Blog.objects.get(id=pk)
+        blog_json = blog.json_serializer()
+        return JsonResponse(blog_json)
 
 
 class BoardList(View):
-    def serialize_data(self):
-        values = Board.objects.values()
-
-        serialized_data = list(values)
-
-        return serialized_data
-
     def get(self, request):
-        return JsonResponse(self.serialize_data(), safe=False)
+        boards = Board.objects.all()
+        boards_json_list = [board.json_serializer() for board in boards]
+        return JsonResponse(boards_json_list, safe=False)
 
     @login_required
     def post(self, request):

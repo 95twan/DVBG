@@ -10,6 +10,13 @@ class Blog(models.Model):
     class Meta:
         db_table = 'blog'
 
+    def json_serializer(self):
+        return {
+            "id": self.id,
+            "user_id": self.user.id,
+            "name": self.name
+        }
+
 
 class Board(models.Model):
     id = models.AutoField(primary_key=True)
@@ -21,6 +28,16 @@ class Board(models.Model):
 
     class Meta:
         db_table = 'board'
+
+    def json_serializer(self):
+        return {
+            "id": self.id,
+            "blog_id": self.blog.id,
+            "name": self.name,
+            "is_hidden": self.is_hidden,
+            "created_at": self.created_at,
+            "deleted_at": self.deleted_at
+        }
 
 
 class Post(models.Model):

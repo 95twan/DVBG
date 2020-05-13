@@ -4,7 +4,11 @@ from django.db import models
 from user.models import User
 
 
-class BaseModel:
+class BaseModel(models.Model):
+
+    class Meta:
+        abstract = True
+
     def json_serializer(self, model):
         data = {}
         fields = model._meta.fields  # 만약 manytomany필드가 있다면 get_fields()로
@@ -19,7 +23,7 @@ class BaseModel:
         return data
 
 
-class Blog(models.Model, BaseModel):
+class Blog(BaseModel):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, models.CASCADE)
     name = models.CharField(max_length=45)
@@ -28,7 +32,7 @@ class Blog(models.Model, BaseModel):
         db_table = 'blog'
 
 
-class Board(models.Model, BaseModel):
+class Board(BaseModel):
     id = models.AutoField(primary_key=True)
     blog = models.ForeignKey(Blog, models.CASCADE)
     name = models.CharField(max_length=45)
@@ -40,7 +44,7 @@ class Board(models.Model, BaseModel):
         db_table = 'board'
 
 
-class Post(models.Model, BaseModel):
+class Post(BaseModel):
     id = models.AutoField(primary_key=True)
     board = models.ForeignKey(Board, models.SET_NULL, blank=True, null=True)
     title = models.CharField(max_length=45)
@@ -60,7 +64,7 @@ class Post(models.Model, BaseModel):
         return data
 
 
-class Comment(models.Model):
+class Comment(BaseModel):
     id = models.AutoField(primary_key=True)
     post = models.ForeignKey(Post, models.CASCADE)
     user = models.ForeignKey(User, models.DO_NOTHING)

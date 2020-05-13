@@ -19,14 +19,14 @@ class BlogDetail(View):
             }
             return JsonResponse(error_data, status=404)
 
-        blog_json = blog.json_serializer()
+        blog_json = blog.json_serializer(blog)
         return JsonResponse(blog_json)
 
 
 class BoardList(View):
     def get(self, request):
         boards = Board.objects.all()
-        boards_json_list = [board.json_serializer() for board in boards]
+        boards_json_list = [board.json_serializer(board) for board in boards]
         return JsonResponse(boards_json_list, safe=False)
 
     @login_required
@@ -49,7 +49,7 @@ class BoardDetail(View):
             }
             return JsonResponse(error_data, status=404)
 
-        board_json = board.json_serializer()
+        board_json = board.json_serializer(board)
         return JsonResponse(board_json)
 
     @login_required
@@ -77,7 +77,7 @@ class BoardDetail(View):
 class PostList(View):
     def get(self, request):
         posts = Post.objects.all()
-        post_json_list = [post.json_serializer() for post in posts]
+        post_json_list = [post.json_serializer(post) for post in posts]
         return JsonResponse(post_json_list, safe=False)
 
     @login_required
@@ -114,7 +114,7 @@ class PostDetail(View):
             }
             return JsonResponse(error_data, status=404)
 
-        post_json = post.json_serializer()
+        post_json = post.json_serializer(post)
 
         return JsonResponse(post_json)
 
@@ -161,7 +161,7 @@ class PostDetail(View):
 class CommentList(View):
     def get(self, request):
         comments = Comment.objects.all()
-        comment_json_list = [comment.json_serializer() for comment in comments]
+        comment_json_list = [comment.json_serializer(comment) for comment in comments]
         return JsonResponse(comment_json_list, safe=False)
 
     @login_required
@@ -184,7 +184,7 @@ class CommentDetail(View):
             }
             return JsonResponse(error_data, status=404)
 
-        comment_json = comment.json_serializer()
+        comment_json = comment.json_serializer(comment)
 
         return JsonResponse(comment_json)
 
@@ -212,5 +212,5 @@ class CommentDetail(View):
 class UserBlog(View):
     def get(self, request, user_id):
         blogs = Blog.objects.filter(user_id=user_id)
-        blog_json_list = [blog.json_serializer() for blog in blogs]
+        blog_json_list = [blog.json_serializer(blog) for blog in blogs]
         return JsonResponse(blog_json_list, safe=False)

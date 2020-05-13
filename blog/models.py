@@ -4,7 +4,22 @@ from django.db import models
 from user.models import User
 
 
-class Blog(models.Model):
+class BaseModel:
+    def json_serializer(self, model):
+        data = {}
+        fields = model._meta.fields  # 만약 manytomany필드가 있다면 get_fields()로
+
+        for field in fields:
+            try:
+                value = field.value_from_object(model)
+                data[field.name] = value
+            except Exception as e:
+                print(e)
+
+        return data
+
+
+class Blog(models.Model, BaseModel):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, models.CASCADE)
     name = models.CharField(max_length=45)
@@ -12,16 +27,8 @@ class Blog(models.Model):
     class Meta:
         db_table = 'blog'
 
-    def json_serializer(self):
-        # allow Null인거는 체크햐야 함
-        return {
-            "id": self.id,
-            "user_id": self.user.id,
-            "name": self.name
-        }
 
-
-class Board(models.Model):
+class Board(models.Model, BaseModel):
     id = models.AutoField(primary_key=True)
     blog = models.ForeignKey(Blog, models.CASCADE)
     name = models.CharField(max_length=45)
@@ -32,19 +39,8 @@ class Board(models.Model):
     class Meta:
         db_table = 'board'
 
-    def json_serializer(self):
-        # allow Null인거는 체크햐야 함
-        return {
-            "id": self.id,
-            "blog_id": self.blog.id,
-            "name": self.name,
-            "is_hidden": self.is_hidden,
-            "created_at": self.created_at,
-            "deleted_at": self.deleted_at
-        }
 
-
-class Post(models.Model):
+class Post(models.Model, BaseModel):
     id = models.AutoField(primary_key=True)
     board = models.ForeignKey(Board, models.SET_NULL, blank=True, null=True)
     title = models.CharField(max_length=45)
@@ -58,22 +54,10 @@ class Post(models.Model):
     class Meta:
         db_table = 'post'
 
-    def json_serializer(self):
-
-        image_data = json.loads(self.images)
-
-        # allow Null인거는 체크햐야 함
-        return {
-            "id": self.id,
-            "board_id": self.board.id,
-            "title": self.title,
-            "content": self.content,
-            "images": image_data,
-            "tag": self.tag,
-            "author_id": self.author.id,
-            "is_hidden": self.is_hidden,
-            "published_at": self.published_at
-        }
+    def json_serializer(self, model):
+        data = super().json_serializer(model)
+        data["images"] = json.loads(data["images"])
+        return data
 
 
 class Comment(models.Model):
@@ -87,16 +71,3 @@ class Comment(models.Model):
 
     class Meta:
         db_table = 'comment'
-
-    def json_serializer(self):
-
-        # allow Null인거는 체크햐야 함
-        return {
-            "id": self.id,
-            "post_id": self.post.id,
-            "user_id": self.user.id,
-            "reply_id": self.reply.id,
-            "content": self.content,
-            "is_private": self.is_private,
-            "registered_at": self.registered_at
-        }

@@ -21,7 +21,11 @@ class BlogList(View):
     def post(self, request):
         json_data = json.loads(request.body)
 
-        Board.objects.create(**json_data)
+        try:
+            blog = Blog.create_blog(json_data)
+            blog.save()
+        except AssertionError as e:
+            return JsonResponse({"error": "잘못된 데이터"}, status=400)
 
         return JsonResponse(json_data, status=201)
 

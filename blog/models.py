@@ -29,6 +29,13 @@ class Blog(BaseModel):
     class Meta:
         db_table = 'blog'
 
+    @classmethod
+    def create_blog(cls, data):
+        assert data.get("user_id")
+        assert data.get("name")
+
+        return cls(user_id=data["user_id"], name=data["name"])
+
 
 class Board(BaseModel):
     id = models.AutoField(primary_key=True)

@@ -9,16 +9,14 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 
-    def json_serializer(self, model):
-        data = {}
-        fields = model._meta.fields  # 만약 manytomany필드가 있다면 get_fields()로
+    def json_serializer(self):
+        fields = self._meta.fields  # 만약 manytomany필드가 있다면 get_fields()로
 
-        for field in fields:
-            try:
-                value = field.value_from_object(model)
-                data[field.name] = value
-            except Exception as e:
-                print(e)
+        try:
+            data = {field.name: field.value_from_object(self) for field in fields}
+        except Exception as e:
+            print(e)
+            data = {}
 
         return data
 
@@ -58,8 +56,8 @@ class Post(BaseModel):
     class Meta:
         db_table = 'post'
 
-    def json_serializer(self, model):
-        data = super().json_serializer(model)
+    def json_serializer(self):
+        data = super().json_serializer()
         data["images"] = json.loads(data["images"])
         return data
 

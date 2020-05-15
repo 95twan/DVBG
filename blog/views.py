@@ -1,11 +1,29 @@
 import json
+from math import ceil
+
 from django.views.generic import View
+from django.shortcuts import redirect
 from django.http import JsonResponse
 
 from blog.models import Post, Board, Comment, Blog
 from blog.tasks import add_new_post_feed_task, removed_post_delete_feed_task
 
 from user.jwt_auth import login_required
+
+
+class BlogList(View):
+    def get(self, request):
+        blogs = Blog.objects.all()
+        blogs_json_list = [blog.json_serializer() for blog in blogs]
+        return JsonResponse(blogs_json_list, safe=False)
+
+    @login_required
+    def post(self, request):
+        json_data = json.loads(request.body)
+
+        Board.objects.create(**json_data)
+
+        return JsonResponse(json_data, status=201)
 
 
 class BlogDetail(View):
@@ -19,14 +37,32 @@ class BlogDetail(View):
             }
             return JsonResponse(error_data, status=404)
 
-        blog_json = blog.json_serializer(blog)
+        blog_json = blog.json_serializer()
         return JsonResponse(blog_json)
 
 
 class BoardList(View):
+    def paginator(self, page):  # paginator class를 따로 만들까? 아니면 BaseView를 만들어서 상속 받을까?
+        object_per_page = 10
+        start_num = object_per_page * (page - 1)
+        end_num = object_per_page * page
+
+        object_total_num = Board.objects.count()
+        page_total_num = int(ceil(object_total_num / object_per_page))
+
+        return start_num, end_num, page_total_num
+
     def get(self, request):
-        boards = Board.objects.all()
-        boards_json_list = [board.json_serializer(board) for board in boards]
+        page = int(request.GET.get('page'))
+        start_num, end_num, page_total_num = self.paginator(page)
+
+        if page is None:
+            return redirect("/api/boards?page=1")
+
+        boards = Board.objects.all()[start_num:end_num]
+        boards_json_list = [board.json_serializer() for board in boards]
+        boards_json_list.insert(0, {"page_total_num": page_total_num})  # json 형식을 어떻게 해서 보낼까???
+
         return JsonResponse(boards_json_list, safe=False)
 
     @login_required
@@ -49,7 +85,7 @@ class BoardDetail(View):
             }
             return JsonResponse(error_data, status=404)
 
-        board_json = board.json_serializer(board)
+        board_json = board.json_serializer()
         return JsonResponse(board_json)
 
     @login_required
@@ -77,8 +113,8 @@ class BoardDetail(View):
 class PostList(View):
     def get(self, request):
         posts = Post.objects.all()
-        post_json_list = [post.json_serializer(post) for post in posts]
-        return JsonResponse(post_json_list, safe=False)
+        posts_json_list = [post.json_serializer() for post in posts]
+        return JsonResponse(posts_json_list, safe=False)
 
     @login_required
     def post(self, request):
@@ -114,7 +150,7 @@ class PostDetail(View):
             }
             return JsonResponse(error_data, status=404)
 
-        post_json = post.json_serializer(post)
+        post_json = post.json_serializer()
 
         return JsonResponse(post_json)
 
@@ -161,8 +197,8 @@ class PostDetail(View):
 class CommentList(View):
     def get(self, request):
         comments = Comment.objects.all()
-        comment_json_list = [comment.json_serializer(comment) for comment in comments]
-        return JsonResponse(comment_json_list, safe=False)
+        comments_json_list = [comment.json_serializer() for comment in comments]
+        return JsonResponse(comments_json_list, safe=False)
 
     @login_required
     def post(self, request):
@@ -184,7 +220,7 @@ class CommentDetail(View):
             }
             return JsonResponse(error_data, status=404)
 
-        comment_json = comment.json_serializer(comment)
+        comment_json = comment.json_serializer()
 
         return JsonResponse(comment_json)
 
@@ -212,5 +248,5 @@ class CommentDetail(View):
 class UserBlog(View):
     def get(self, request, user_id):
         blogs = Blog.objects.filter(user_id=user_id)
-        blog_json_list = [blog.json_serializer(blog) for blog in blogs]
-        return JsonResponse(blog_json_list, safe=False)
+        blogs_json_list = [blog.json_serializer() for blog in blogs]
+        return JsonResponse(blogs_json_list, safe=False)

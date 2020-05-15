@@ -3,6 +3,7 @@ from blog import views
 
 app_name = 'blog'
 urlpatterns = [
+    path('blogs', views.BlogList.as_view(), name='blog_list'),
     path('blogs/<int:pk>', views.BlogDetail.as_view(), name='blog_detail'),
     path('boards', views.BoardList.as_view(), name='board_list'),
     path('boards/<int:pk>', views.BoardDetail.as_view(), name='board_detail'),

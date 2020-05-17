@@ -1,6 +1,7 @@
 import json
 from django.views.generic import View
 from django.http import JsonResponse
+from django.core.cache import cache
 
 from blog.models import Post, Board, Comment, Blog
 from blog.tasks import add_new_post_feed_task, removed_post_delete_feed_task
@@ -19,7 +20,7 @@ class BlogDetail(View):
 
 class BoardList(View):
     def serialize_data(self):
-        values = Board.objects.values()
+        values = cache.get_or_set('boards', Board.objects.values())
 
         serialized_data = list(values)
 
@@ -30,6 +31,8 @@ class BoardList(View):
 
     @login_required
     def post(self, request):
+        cache.delete('boards')
+
         json_data = json.loads(request.body)
 
         Board.objects.create(name=json_data['name'], is_hidden=json_data['is_hidden'])
@@ -47,6 +50,8 @@ class BoardDetail(View):
 
     @login_required
     def put(self, request, pk):
+        cache.delete('boards')
+
         json_data = json.loads(request.body)
 
         board = Board.objects.filter(id=pk)
@@ -56,6 +61,8 @@ class BoardDetail(View):
 
     @login_required
     def delete(self, request, pk):
+        cache.delete('boards')
+
         board = Board.objects.get(id=pk)
         board.post_set.update(is_hidden="True")
         board.delete()

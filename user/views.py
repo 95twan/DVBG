@@ -9,8 +9,6 @@ import user.validation as valid
 
 
 class BaseRegister(View):
-    # 질문4: 중복 체크 할 때 저장하기 전에 미리 체크 한 후에 한다 아니면 저장할때 발생하는 오류로 체크한다.
-    # 질문5: 가입 할때 username이나 nickname의 중복 체크를 따로 요청하는지?
     def is_valid(self, data):
         valid.nickname_check(data["nickname"])
         valid.email_check(data["email"])
@@ -24,11 +22,10 @@ class BaseRegister(View):
 class SelfRegister(BaseRegister):
     def post(self, request):
         json_data = json.loads(request.body)
-        user_data = json_data["user"]
 
-        # validate check
         try:
-            valid_user_data = self.is_valid(user_data)
+            user = User.create_user(json_data)
+            user.save()
         except Exception as e:
             print(e)
             error = {
@@ -36,20 +33,8 @@ class SelfRegister(BaseRegister):
                 "msg": str(e)
             }
             return JsonResponse(error, status=400)
-        else:
-            # USER 저장
-            # password 암호화???
-            valid_user_data["password"] = make_password(valid_user_data["password"])
-            self.user_register(valid_user_data)
 
-            return JsonResponse(user_data, status=201)
-
-    def is_valid(self, data):
-        # username && password valid 체크
-        valid.username_check(data.get("username"))
-        valid.password_check(data.get("password"))
-
-        return super().is_valid(data)
+        return JsonResponse(json_data["user"], status=201)
 
 
 class OAuthRegister(BaseRegister):
@@ -153,7 +138,7 @@ class SelfLogin(BaseLogin):
 
 
 class OAuthLogin(BaseLogin):
-    # 질문3: OAuth로 로그인하면 무슨 데이터가 오나???
+    # OAuth로 로그인하면 무슨 데이터가 오나???
     def post(self, request):
         json_data = json.loads(request.body)
 
